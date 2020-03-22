@@ -1,0 +1,90 @@
+---
+title: "Web scraping app"
+output: 
+  flexdashboard::flex_dashboard:
+    orientation: rows
+    vertical_layout: fill
+---
+
+```{r setup, include=FALSE}
+# instale esses pacotes!
+library(flexdashboard)
+library(tidyverse)
+library(tidytext)
+library(ggwordcloud)
+library(leaflet)
+library(reactable)
+
+# Deixe comentado caso não tenha feito algum exercício
+# source("01-transparencia.R")
+# source("02-sabesp.R")
+# source("03-sptrans.R")
+# source("04-twitter.R")
+# source("05-covid.R")
+# source("06-chancedegol.R")
+# source("07-tjsp.R")
+```
+
+Row
+-----------------------------------------------------------------------
+
+### 1.1. Quantidade Bolsa família
+
+```{r}
+## resultados exercicio 01
+# valueBox(qtd_bf, icon = "fa-users")
+```
+
+### 1.2. Valor Bolsa família
+
+```{r}
+## resultados exercicio 01
+# valueBox(scales::dollar(valor_bf, prefix = "R$ "), color = "info", icon = "fa-dollar-sign")
+```
+
+Row
+-----------------------------------------------------------------------
+
+### 2. Níveis de água da Sabesp
+
+```{r}
+## resultados exercicio 02
+```
+
+### 3. Ônibus SPtrans
+
+```{r}
+## resultados exercicio 03
+```
+
+
+### 4. Meus Tweets
+
+```{r}
+## resultados exercicio 04
+```
+
+
+Row
+-----------------------------------------------------------------------
+
+### 5. Coronavirus
+
+```{r}
+## resultados exercicio 05
+```
+
+### 6. Brasileirão 2019
+
+```{r}
+## resultados exercicio 06
+```
+
+### 7. Tribunal de Justiça de São Paulo
+
+```{r}
+## resultados exercicio 07
+```
+
+
+

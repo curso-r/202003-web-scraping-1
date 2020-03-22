@@ -1,0 +1,150 @@
+---
+title: "Web scraping app"
+output: 
+  flexdashboard::flex_dashboard:
+    orientation: rows
+    vertical_layout: fill
+---
+
+```{r setup, include=FALSE}
+# instale esses pacotes!
+library(flexdashboard)
+library(tidyverse)
+library(tidytext)
+library(ggwordcloud)
+library(leaflet)
+source("08-case.R")
+```
+
+Row
+-----------------------------------------------------------------------
+
+### 1.1. Quantidade Bolsa família
+
+```{r}
+if (!is.null(qtd_bf)) {
+  valueBox(qtd_bf, icon = "fa-users")  
+}
+```
+
+### 1.2. Valor Bolsa família
+
+```{r}
+if (!is.null(valor_bf)) {
+  valueBox(scales::dollar(valor_bf, prefix = "R$ "), color = "info", icon = "fa-dollar-sign")
+}
+```
+
+Row
+-----------------------------------------------------------------------
+
+### 2. Níveis de água da Sabesp
+
+```{r}
+if (!is.null(tab_sabesp)) {
+  tab_sabesp %>% 
+    janitor::clean_names() %>% 
+    transmute(nome, volume = as.numeric(volume_porcentagem)) %>% 
+    mutate(nome = fct_reorder(nome, volume)) %>% 
+    ggplot(aes(x = volume/100, y = nome)) +
+    geom_col(fill = "royalblue", alpha = 0.9) +
+    scale_x_continuous(labels = scales::percent) +
+    theme_minimal(16) +
+    geom_vline(xintercept = 1, linetype = 2, colour = "red") +
+    labs(x = "Volume Operacional", y = "Manancial")
+}
+```
+
+### 3. Ônibus SPtrans
+
+```{r}
+if (!is.null(tab_sptrans)) {
+  tab_sptrans$l %>% 
+    as_tibble() %>% 
+    unnest(vs) %>% 
+    transmute(
+      lat = py, lon = px,
+      label = str_glue("<b>Linha:</b> {c}<br/><b>De: </b>{lt0}<br/><b>Para: </b>{lt1}"),
+      label = purrr::map(label, htmltools::HTML)
+    ) %>% 
+    leaflet() %>% 
+    addTiles() %>% 
+    addMarkers(
+      lng = ~lon, 
+      lat = ~lat, 
+      clusterOptions = markerClusterOptions(), 
+      popup = ~label
+    )
+}
+
+```
+
+
+### 4. Meus Tweets
+
+```{r}
+if (!is.null(tab_twitter) && nrow(tab_twitter) > 0) {
+  tab_twitter %>% 
+    select(created_at, screen_name, text, source) %>% 
+    reactable::reactable()
+}
+```
+
+Row
+-----------------------------------------------------------------------
+
+### 5. Coronavirus
+
+```{r}
+if (!is.null(tab_covid)) {
+  tab_covid %>% 
+    mutate(death_rate = deaths/confirmed) %>% 
+    arrange(desc(death_rate)) %>% 
+    filter(confirmed > 1000) %>% 
+    mutate(pais = fct_reorder(pais, death_rate)) %>% 
+    ggplot(aes(x = death_rate, y = pais)) +
+    geom_col(alpha = 0.7, fill = "red") +
+    scale_x_continuous(labels = scales::percent) +
+    theme_minimal(16) +
+    labs(x = "Morte / caso", y = "País")
+}
+```
+
+### 6. Brasileirão 2019
+
+```{r}
+if (!is.null(tab_cdg)) {
+  tab_cdg %>% 
+    pivot_longer(c(mandante, visitante)) %>% 
+    group_by(value) %>% 
+    summarise(prop_acertou = mean(acertou)) %>% 
+    mutate(value = fct_reorder(value, prop_acertou)) %>% 
+    ggplot(aes(x = prop_acertou, y = value)) +
+    geom_col(fill = "darkgreen", alpha = 0.6) +
+    scale_x_continuous(labels = scales::percent, breaks = 0:10/10, limits = c(0, 1)) +
+    theme_minimal(16) +
+    geom_vline(xintercept = .5, linetype = 2, colour = "black") +
+    labs(x = "Proporção de acertos", y = "Time")
+}
+```
+
+### 7. Tribunal de Justiça de São Paulo
+
+```{r}
+if (!is.null(tab_tjsp)) {
+  
+  words <- tab_tjsp %>% 
+    tidytext::unnest_ngrams(word, ementa, n = 1) %>% 
+    filter(!word %in% tidytext::get_stopwords("pt")$word) %>% 
+    count(word, sort = TRUE) %>% 
+    head(30)
+  
+  ggplot(words, aes(label = word, size = n)) +
+    geom_text_wordcloud() +
+    theme_minimal() +
+    scale_size_area(max_size = 20)
+}
+```
+
+
+
