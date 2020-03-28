@@ -1,4 +1,4 @@
 #' Exercício 00-ola-mundo
-#' Nome do aluno: 
+#' Nome do aluno: Jubs
 
-print("XX diz: ola, mundo!")
+print("Julio diz: ola, mundo!")

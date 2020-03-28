@@ -6,7 +6,7 @@
 # us ----------------------------------------------------------------------
 
 # 1. colete os dados de mananciais da sabesp
-u_sabesp <- "http://mananciais.sabesp.com.br/api/Mananciais/ResumoSistemas/2020-03-15"
+u_sabesp <- "http://mananciais.sabesp.com.br/api/Mananciais/ResumoSistemas/2020-03-13"
 r_sabesp <- httr::GET(u_sabesp)
 results <- httr::content(r_sabesp, simplifyDataFrame = TRUE)
 results$ReturnObj$sistemas
@@ -16,14 +16,23 @@ results$ReturnObj$sistemas
 # 1. Escreva uma função que recebe uma data e retorna a tabela dos mananciais
 
 baixar_sabesp <- function(data) {
-  # ...
+  u_sabesp <- paste0("http://mananciais.sabesp.com.br/api/Mananciais/ResumoSistemas/", data)
+  r_sabesp <- httr::GET(u_sabesp)
+  results <- httr::content(r_sabesp, simplifyDataFrame = TRUE)
+  results$ReturnObj$sistemas
 }
+
+baixar_sabesp("2020-03-13")
 
 # 2. Armazene no objeto tab_sabesp a tabela do dia `Sys.Date() - 1` (ontem)
 
-tab_sabesp <- "..."
+tab_sabesp <- baixar_sabesp(Sys.Date() - 1)
 
 # 3. [extra] Arrume os dados para que fique assim:
+
+dados_arrumados <- tab_sabesp %>% 
+  dplyr::select(nome = Nome, volume = VolumePorcentagem) %>% 
+  dplyr::mutate(nome = forcats::fct_reorder(nome, volume))
 
 # Observations: 7
 # Variables: 2
@@ -32,6 +41,11 @@ tab_sabesp <- "..."
 
 # 4. [extra] abra o 01-case.Rmd e monte o gráfico do item 2.
 
+library(ggplot2)
+dados_arrumados %>% 
+  ggplot(aes(y = nome, x = volume)) +
+  geom_col()
+  
 
 
 
